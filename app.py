@@ -1,7 +1,8 @@
 import streamlit as st
 import pickle
 from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
+import numpy as np
+
 # Load the pre-trained model
 with open('regressor.pkl', 'rb') as file:
     model = pickle.load(file)
@@ -9,10 +10,24 @@ with open('regressor.pkl', 'rb') as file:
 # Streamlit app
 st.title('Height Prediction App')
 
+# Initialize StandardScaler
+scaler = StandardScaler()
+
 # Input weight
 weight = st.number_input('Enter weight (kg)', min_value=0.0, step=0.1)
-#weight = scaler.fit_transform(weight)
+
+# Convert weight to a 2D array
+weight_array = np.array([[weight]])  # 2D array
+
+# Fit the scaler with a dummy example (normally you fit it during model training)
+scaler.fit(weight_array)
+
 # Predict height
 if st.button('Predict Height'):
-    height = model.predict([[weight]])
-    st.write(f'Predicted Height: {height}')
+    # Scale the weight
+    scaled_weight = scaler.transform(weight_array)
+    
+    # Predict height
+    height = model.predict(scaled_weight)
+    
+    st.write(f'Predicted Height: {float(height[0]):.2f}')
